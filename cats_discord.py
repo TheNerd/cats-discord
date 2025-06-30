@@ -4,10 +4,10 @@ from discord_webhook import DiscordWebhook
 import datetime
 
 # configuration 
-botname = "" # give your bot a nice name so you know who it is
-webhookurl = "" # got to Discord and set up a web hook for the channel you want to post to
-avatar = "" # URL of an image to use as the avatar for the bot. This needs to be an public accessible location.
-systemd_unit = "cats-igate.service" # leave this at cats-igate.service for use on a Raspberry Pi with a Hat - piwifhat
+botname = ""
+webhookurl = "" 
+avatar = "https://domain.ext/cats_logo.png" # this needs to be an public accessible location
+systemd_unit = "cats-igate.service" # leave this at cats-igate.service for use on a Raspberry Pi with a Hat
 
 
 def bot_stop_err(err):
@@ -38,7 +38,7 @@ def main():
     p = select.poll()
     p.register(j, j.get_events())
 
-    message = ""
+    output = ""
 
     try:
 
@@ -49,19 +49,17 @@ def main():
             if j.process() != journal.APPEND:
                 continue
 
-            # iterate over the entries from the journal to build the output. 
+            # iterate over the entries and add them to the output. 
             for entry in j:
                 if entry['MESSAGE'] != "":
-                    message += str(entry['__REALTIME_TIMESTAMP'].strftime("%H:%M:%S")) + " - " + entry['MESSAGE'] + "\n"
+                    output += str(entry['__REALTIME_TIMESTAMP'].strftime("%H:%M:%S")) + " - " + entry['MESSAGE'] + "\n"
 
-            # add a divider for readability
-            if message != "":
-                message += "------------------------------------\n"
-            
-            #send the message to discord
-            bot_send_message(message)
-    
-    # nothing fancy but lets you know if the bot craps out
+	    # add a divider for readability
+            if output != "":
+                output += "------------------------------------\n"
+                bot_send_message(output)
+                output = ""
+
     except Exception as e:
         bot_stop_err(e)
 
